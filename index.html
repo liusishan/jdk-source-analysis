@@ -21,7 +21,7 @@
 <div class="details">
 <span id="author" class="author">D瓜哥</span><br>
 <span id="email" class="email"><a href="https://www.diguage.com" class="bare">https://www.diguage.com</a></span><br>
-<span id="revdate">2021-07-18</span>
+<span id="revdate">2022-02-20</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -96,15 +96,16 @@
 <li><a href="#_priorityblockingqueue">67. PriorityBlockingQueue</a></li>
 <li><a href="#_delayqueue">68. DelayQueue</a></li>
 <li><a href="#_scheduledthreadpoolexecutor">69. <code>ScheduledThreadPoolExecutor</code></a></li>
-<li><a href="#_classloader">70. ClassLoader</a></li>
-<li><a href="#_field">71. Field</a></li>
-<li><a href="#_proxy">72. Proxy</a></li>
-<li><a href="#_serversocket">73. ServerSocket</a></li>
-<li><a href="#_serviceloader">74. <code>ServiceLoader</code></a></li>
-<li><a href="#_string">75. <code>String</code></a></li>
-<li><a href="#_date">76. <code>Date</code></a></li>
-<li><a href="#_serializable">77. <code>Serializable</code></a></li>
-<li><a href="#_netty">78. Netty</a></li>
+<li><a href="#_flow">70. <code>Flow</code></a></li>
+<li><a href="#_classloader">71. ClassLoader</a></li>
+<li><a href="#_field">72. Field</a></li>
+<li><a href="#_proxy">73. Proxy</a></li>
+<li><a href="#_serversocket">74. ServerSocket</a></li>
+<li><a href="#_serviceloader">75. <code>ServiceLoader</code></a></li>
+<li><a href="#_string">76. <code>String</code></a></li>
+<li><a href="#_date">77. <code>Date</code></a></li>
+<li><a href="#_serializable">78. <code>Serializable</code></a></li>
+<li><a href="#_netty">79. Netty</a></li>
 </ul>
 </div>
 </div>
@@ -14161,7 +14162,137 @@ key效率要更快些。对于HashMap的源码暂时就分析这么多，由于�
 </div>
 </div>
 <div class="sect1">
-<h2 id="_classloader"><a class="anchor" href="#_classloader"></a>70. ClassLoader</h2>
+<h2 id="_flow"><a class="anchor" href="#_flow"></a>70. <code>Flow</code></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>早在 2013年，一些知名的有影响力的网络公司提出 <a href="http://www.reactive-streams.org/" target="_blank" rel="noopener">Reactive Streams</a> 提案，旨在标准版软件组件之间的异步数据交换。</p>
+</div>
+<div class="paragraph">
+<p>为了减少重复和不兼容性，Java 9 引入了 <code>java.util.concurrent.Flow</code> 类，统一并规范了 Reactive Streams 的接口。但是， <code>Flow</code> 只定义了接口，并没有给出具体实现。下面是一个简单实现：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight nowrap"><code data-lang="java"><table class="linenotable"><tbody><tr><td class="linenos gl"><pre class="lineno"> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+</pre></td><td class="code"><pre><span class="kn">package</span> <span class="nn">com.diguage.truman</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.junit.jupiter.api.Test</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.concurrent.SubmissionPublisher</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.concurrent.TimeUnit</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">java</span><span class="o">.</span><span class="na">util</span><span class="o">.</span><span class="na">concurrent</span><span class="o">.</span><span class="na">Flow</span><span class="o">.</span><span class="na">Subscriber</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">java</span><span class="o">.</span><span class="na">util</span><span class="o">.</span><span class="na">concurrent</span><span class="o">.</span><span class="na">Flow</span><span class="o">.</span><span class="na">Subscription</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">FlowTest</span> <span class="o">{</span>
+
+  <span class="nd">@Test</span>
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">test</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">InterruptedException</span> <span class="o">{</span>
+    <span class="nc">SubmissionPublisher</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">publisher</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">SubmissionPublisher</span><span class="o">&lt;&gt;();</span>
+    <span class="n">publisher</span><span class="o">.</span><span class="na">subscribe</span><span class="o">(</span><span class="k">new</span> <span class="nc">PrintSubscriber</span><span class="o">());</span>
+
+    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Submitting items..."</span><span class="o">);</span>
+    <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+      <span class="n">publisher</span><span class="o">.</span><span class="na">submit</span><span class="o">(</span><span class="n">i</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="nc">TimeUnit</span><span class="o">.</span><span class="na">SECONDS</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>
+    <span class="n">publisher</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+  <span class="o">}</span>
+
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">PrintSubscriber</span> <span class="kd">implements</span> <span class="nc">Subscriber</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="nc">Subscription</span> <span class="n">subscription</span><span class="o">;</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onSubscribe</span><span class="o">(</span><span class="nc">Subscription</span> <span class="n">subscription</span><span class="o">)</span> <span class="o">{</span>
+      <span class="k">this</span><span class="o">.</span><span class="na">subscription</span> <span class="o">=</span> <span class="n">subscription</span><span class="o">;</span>
+      <span class="n">subscription</span><span class="o">.</span><span class="na">request</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onNext</span><span class="o">(</span><span class="nc">Integer</span> <span class="n">item</span><span class="o">)</span> <span class="o">{</span>
+      <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Received item: "</span> <span class="o">+</span> <span class="n">item</span><span class="o">);</span>
+      <span class="n">subscription</span><span class="o">.</span><span class="na">request</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onError</span><span class="o">(</span><span class="nc">Throwable</span> <span class="n">throwable</span><span class="o">)</span> <span class="o">{</span>
+      <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Error occurred: "</span> <span class="o">+</span> <span class="n">throwable</span><span class="o">.</span><span class="na">getMessage</span><span class="o">());</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onComplete</span><span class="o">()</span> <span class="o">{</span>
+      <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"PrintSubscriber is complete"</span><span class="o">);</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></td></tr></tbody></table></code></pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_参考资料_21"><a class="anchor" href="#_参考资料_21"></a>70.1. 参考资料</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><a href="https://dzone.com/articles/reactive-streams-in-java-9" target="_blank" rel="noopener">Reactive Streams in Java 9</a></p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_classloader"><a class="anchor" href="#_classloader"></a>71. ClassLoader</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>虽然对 <code>ClassLoader</code> 的双亲委派流程比较了解，但是一直没有仔细专研过代码实现。今天翻看代码，代码写的简单明了：</p>
@@ -14574,7 +14705,7 @@ key效率要更快些。对于HashMap的源码暂时就分析这么多，由于�
 </ul>
 </div>
 <div class="sect2">
-<h3 id="_参考资料_21"><a class="anchor" href="#_参考资料_21"></a>70.1. 参考资料</h3>
+<h3 id="_参考资料_22"><a class="anchor" href="#_参考资料_22"></a>71.1. 参考资料</h3>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -14586,7 +14717,7 @@ key效率要更快些。对于HashMap的源码暂时就分析这么多，由于�
 </div>
 </div>
 <div class="sect1">
-<h2 id="_field"><a class="anchor" href="#_field"></a>71. Field</h2>
+<h2 id="_field"><a class="anchor" href="#_field"></a>72. Field</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>属性操作方法 <code>Field#set(Object obj, Object value)</code> 和 <code>Field#get(Object obj)</code> 底层都是委托到 <code>jdk.internal.reflect.FieldAccessor</code> 实现。</p>
@@ -14636,7 +14767,7 @@ key效率要更快些。对于HashMap的源码暂时就分析这么多，由于�
 <p>属性反射操作 <code>Field</code> 的 <code>setXX</code> 和 <code>getXX</code> 方法最终委托到 <code>jdk.internal.misc.Unsafe</code> 的 <code>putXX</code> 和 <code>getXX</code> 方法，而属性的内存偏移地址是通过 <code>jdk.internal.misc.Unsafe</code> 的 <code>staticFieldBase()</code>、<code>staticFieldOffset</code> 和 <code>objectFieldOffset</code> 几个方法计算的。</p>
 </div>
 <div class="sect2">
-<h3 id="_参考资料_22"><a class="anchor" href="#_参考资料_22"></a>71.1. 参考资料</h3>
+<h3 id="_参考资料_23"><a class="anchor" href="#_参考资料_23"></a>72.1. 参考资料</h3>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -14648,7 +14779,7 @@ key效率要更快些。对于HashMap的源码暂时就分析这么多，由于�
 </div>
 </div>
 <div class="sect1">
-<h2 id="_proxy"><a class="anchor" href="#_proxy"></a>72. Proxy</h2>
+<h2 id="_proxy"><a class="anchor" href="#_proxy"></a>73. Proxy</h2>
 <div class="sectionbody">
 <div class="listingblock">
 <div class="content">
@@ -15218,7 +15349,7 @@ key效率要更快些。对于HashMap的源码暂时就分析这么多，由于�
 <p>既然都生成代理类了，为什么不直接继承代理类呢？这样就可以对代理类所有的方法进行增强了。</p>
 </div>
 <div class="sect2">
-<h3 id="_思考题_2"><a class="anchor" href="#_思考题_2"></a>72.1. 思考题</h3>
+<h3 id="_思考题_2"><a class="anchor" href="#_思考题_2"></a>73.1. 思考题</h3>
 <div class="paragraph">
 <p>如何自己写代码来实现代码生成、加载类的动态代理？</p>
 </div>
@@ -15240,7 +15371,7 @@ key效率要更快些。对于HashMap的源码暂时就分析这么多，由于�
 </div>
 </div>
 <div class="sect2">
-<h3 id="_cglib"><a class="anchor" href="#_cglib"></a>72.2. CGLIB</h3>
+<h3 id="_cglib"><a class="anchor" href="#_cglib"></a>73.2. CGLIB</h3>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -15253,7 +15384,7 @@ key效率要更快些。对于HashMap的源码暂时就分析这么多，由于�
 </div>
 </div>
 <div class="sect2">
-<h3 id="_参考资料_23"><a class="anchor" href="#_参考资料_23"></a>72.3. 参考资料</h3>
+<h3 id="_参考资料_24"><a class="anchor" href="#_参考资料_24"></a>73.3. 参考资料</h3>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -15283,7 +15414,7 @@ key效率要更快些。对于HashMap的源码暂时就分析这么多，由于�
 </div>
 </div>
 <div class="sect1">
-<h2 id="_serversocket"><a class="anchor" href="#_serversocket"></a>73. ServerSocket</h2>
+<h2 id="_serversocket"><a class="anchor" href="#_serversocket"></a>74. ServerSocket</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>在纠结了 N 久之后，终于动手写程序完成了 Socket 全双工实验。实验证实，Socket 在接受的同时，还可以发送报文。</p>
@@ -15495,7 +15626,7 @@ key效率要更快些。对于HashMap的源码暂时就分析这么多，由于�
 </div>
 </div>
 <div class="sect2">
-<h3 id="_参考资料_24"><a class="anchor" href="#_参考资料_24"></a>73.1. 参考资料</h3>
+<h3 id="_参考资料_25"><a class="anchor" href="#_参考资料_25"></a>74.1. 参考资料</h3>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -15507,7 +15638,7 @@ key效率要更快些。对于HashMap的源码暂时就分析这么多，由于�
 </div>
 </div>
 <div class="sect1">
-<h2 id="_serviceloader"><a class="anchor" href="#_serviceloader"></a>74. <code>ServiceLoader</code></h2>
+<h2 id="_serviceloader"><a class="anchor" href="#_serviceloader"></a>75. <code>ServiceLoader</code></h2>
 <div class="sectionbody">
 <div class="listingblock">
 <div class="content">
@@ -15655,7 +15786,7 @@ key效率要更快些。对于HashMap的源码暂时就分析这么多，由于�
 </ol>
 </div>
 <div class="sect2">
-<h3 id="_参考资料_25"><a class="anchor" href="#_参考资料_25"></a>74.1. 参考资料</h3>
+<h3 id="_参考资料_26"><a class="anchor" href="#_参考资料_26"></a>75.1. 参考资料</h3>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -15667,7 +15798,7 @@ key效率要更快些。对于HashMap的源码暂时就分析这么多，由于�
 </div>
 </div>
 <div class="sect1">
-<h2 id="_string"><a class="anchor" href="#_string"></a>75. <code>String</code></h2>
+<h2 id="_string"><a class="anchor" href="#_string"></a>76. <code>String</code></h2>
 <div class="sectionbody">
 <div class="listingblock">
 <div class="content">
@@ -15820,7 +15951,7 @@ key效率要更快些。对于HashMap的源码暂时就分析这么多，由于�
 </div>
 </div>
 <div class="sect1">
-<h2 id="_date"><a class="anchor" href="#_date"></a>76. <code>Date</code></h2>
+<h2 id="_date"><a class="anchor" href="#_date"></a>77. <code>Date</code></h2>
 <div class="sectionbody">
 <div class="listingblock">
 <div class="content">
@@ -16020,7 +16151,7 @@ key效率要更快些。对于HashMap的源码暂时就分析这么多，由于�
 </div>
 </div>
 <div class="sect1">
-<h2 id="_serializable"><a class="anchor" href="#_serializable"></a>77. <code>Serializable</code></h2>
+<h2 id="_serializable"><a class="anchor" href="#_serializable"></a>78. <code>Serializable</code></h2>
 <div class="sectionbody">
 <div class="listingblock">
 <div class="content">
@@ -16188,13 +16319,13 @@ key效率要更快些。对于HashMap的源码暂时就分析这么多，由于�
 </div>
 </div>
 <div class="sect1">
-<h2 id="_netty"><a class="anchor" href="#_netty"></a>78. Netty</h2>
+<h2 id="_netty"><a class="anchor" href="#_netty"></a>79. Netty</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Netty 和 <code>ServerSocketChannel</code> 可以互相操作吗？</p>
 </div>
 <div class="sect2">
-<h3 id="_jdk_原生_socket_编程"><a class="anchor" href="#_jdk_原生_socket_编程"></a>78.1. JDK 原生 Socket 编程</h3>
+<h3 id="_jdk_原生_socket_编程"><a class="anchor" href="#_jdk_原生_socket_编程"></a>79.1. JDK 原生 Socket 编程</h3>
 <div class="paragraph">
 <p>使用 JDK 原生的 Socket API 进行网络编程：</p>
 </div>
@@ -16449,7 +16580,7 @@ key效率要更快些。对于HashMap的源码暂时就分析这么多，由于�
 </div>
 </div>
 <div class="sect2">
-<h3 id="_server_startup"><a class="anchor" href="#_server_startup"></a>78.2. Server startup</h3>
+<h3 id="_server_startup"><a class="anchor" href="#_server_startup"></a>79.2. Server startup</h3>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight nowrap"><code data-lang="java"><table class="linenotable"><tbody><tr><td class="linenos gl"><pre class="lineno">  1
@@ -16877,7 +17008,7 @@ key效率要更快些。对于HashMap的源码暂时就分析这么多，由于�
 </div>
 </div>
 <div class="sect2">
-<h3 id="_nioeventloop"><a class="anchor" href="#_nioeventloop"></a>78.3. <code>NioEventLoop</code></h3>
+<h3 id="_nioeventloop"><a class="anchor" href="#_nioeventloop"></a>79.3. <code>NioEventLoop</code></h3>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -16905,7 +17036,7 @@ key效率要更快些。对于HashMap的源码暂时就分析这么多，由于�
 </ol>
 </div>
 <div class="sect3">
-<h4 id="_nioeventloop_创建"><a class="anchor" href="#_nioeventloop_创建"></a>78.3.1. <code>NioEventLoop</code> 创建</h4>
+<h4 id="_nioeventloop_创建"><a class="anchor" href="#_nioeventloop_创建"></a>79.3.1. <code>NioEventLoop</code> 创建</h4>
 <div class="paragraph">
 <p><code>NioEventLoop</code> 默认是在调用 <code>NioEventLoopGroup()</code> 时被创建，默认是 2 倍的 CPU 数量（由常量 <code>MultithreadEventLoopGroup.DEFAULT_EVENT_LOOP_THREADS</code> 来定义）。</p>
 </div>
@@ -16945,7 +17076,7 @@ key效率要更快些。对于HashMap的源码暂时就分析这么多，由于�
 </div>
 </div>
 <div class="sect3">
-<h4 id="_nioeventloop_启动"><a class="anchor" href="#_nioeventloop_启动"></a>78.3.2. <code>NioEventLoop</code> 启动</h4>
+<h4 id="_nioeventloop_启动"><a class="anchor" href="#_nioeventloop_启动"></a>79.3.2. <code>NioEventLoop</code> 启动</h4>
 <div class="ulist">
 <ul>
 <li>
@@ -16961,7 +17092,7 @@ key效率要更快些。对于HashMap的源码暂时就分析这么多，由于�
 </div>
 </div>
 <div class="sect3">
-<h4 id="_nioeventloop_执行逻辑"><a class="anchor" href="#_nioeventloop_执行逻辑"></a>78.3.3. <code>NioEventLoop</code> 执行逻辑</h4>
+<h4 id="_nioeventloop_执行逻辑"><a class="anchor" href="#_nioeventloop_执行逻辑"></a>79.3.3. <code>NioEventLoop</code> 执行逻辑</h4>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -17029,7 +17160,7 @@ key效率要更快些。对于HashMap的源码暂时就分析这么多，由于�
 </div>
 </div>
 <div class="sect2">
-<h3 id="_netty_2"><a class="anchor" href="#_netty_2"></a>78.4. Netty</h3>
+<h3 id="_netty_2"><a class="anchor" href="#_netty_2"></a>79.4. Netty</h3>
 <div class="paragraph">
 <p>创建 bossGroup 和 workerGroup
 . 创建两个线程组 bossGroup 和 workerGroup
@@ -17038,7 +17169,7 @@ key效率要更快些。对于HashMap的源码暂时就分析这么多，由于�
 . bossGroup 和 workerGroup 含有的子线程(NioEventLoop)的个数。默认 <code>CPU 内核数 * 2</code>，在 <code>io.netty.channel.MultithreadEventLoopGroup.DEFAULT_EVENT_LOOP_THREADS</code> 常量中定义</p>
 </div>
 <div class="sect3">
-<h4 id="_异步任务"><a class="anchor" href="#_异步任务"></a>78.4.1. 异步任务</h4>
+<h4 id="_异步任务"><a class="anchor" href="#_异步任务"></a>79.4.1. 异步任务</h4>
 <div class="paragraph">
 <p>比如这里我们有一个非常耗时长的业务&#8594; 异步执行 &#8594; 提交该 channel 对应的 NIOEventLoop 的 taskQueue 中, 从 ctx &#8594; pipeline &#8594; eventLoop &#8594; taskQueue 可以看到提交的任务。</p>
 </div>
@@ -17553,7 +17684,7 @@ key效率要更快些。对于HashMap的源码暂时就分析这么多，由于�
 </div>
 </div>
 <div class="sect3">
-<h4 id="_http"><a class="anchor" href="#_http"></a>78.4.2. HTTP</h4>
+<h4 id="_http"><a class="anchor" href="#_http"></a>79.4.2. HTTP</h4>
 <div class="paragraph">
 <p><code>io.netty.handler.codec.http.DefaultHttpRequest</code> 是 <code>io.netty.handler.codec.http.HttpObject</code> 的一个实现类。</p>
 </div>
@@ -17889,13 +18020,13 @@ key效率要更快些。对于HashMap的源码暂时就分析这么多，由于�
 </div>
 </div>
 <div class="sect3">
-<h4 id="_channelhandlercontext"><a class="anchor" href="#_channelhandlercontext"></a>78.4.3. <code>ChannelHandlerContext</code></h4>
+<h4 id="_channelhandlercontext"><a class="anchor" href="#_channelhandlercontext"></a>79.4.3. <code>ChannelHandlerContext</code></h4>
 <div class="paragraph">
 <p><code>ChannelHandlerContext</code> 和 <code>ChannelHandler</code> 属于一对一关系。</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_channeloption"><a class="anchor" href="#_channeloption"></a>78.4.4. <code>ChannelOption</code></h4>
+<h4 id="_channeloption"><a class="anchor" href="#_channeloption"></a>79.4.4. <code>ChannelOption</code></h4>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -18045,7 +18176,7 @@ key效率要更快些。对于HashMap的源码暂时就分析这么多，由于�
 </div>
 </div>
 <div class="sect3">
-<h4 id="_tcp_粘包和拆包"><a class="anchor" href="#_tcp_粘包和拆包"></a>78.4.5. TCP 粘包和拆包</h4>
+<h4 id="_tcp_粘包和拆包"><a class="anchor" href="#_tcp_粘包和拆包"></a>79.4.5. TCP 粘包和拆包</h4>
 <div class="paragraph">
 <p>遇到异常就关闭连接，这样做合适吗？工程化的做法应该是怎么样的？如何重连或者重试？</p>
 </div>
@@ -18058,7 +18189,7 @@ key效率要更快些。对于HashMap的源码暂时就分析这么多，由于�
 </div>
 </div>
 <div class="sect2">
-<h3 id="_源码分析"><a class="anchor" href="#_源码分析"></a>78.5. 源码分析</h3>
+<h3 id="_源码分析"><a class="anchor" href="#_源码分析"></a>79.5. 源码分析</h3>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -18101,7 +18232,7 @@ key效率要更快些。对于HashMap的源码暂时就分析这么多，由于�
 </div>
 </div>
 <div class="sect2">
-<h3 id="_时间轮"><a class="anchor" href="#_时间轮"></a>78.6. 时间轮</h3>
+<h3 id="_时间轮"><a class="anchor" href="#_时间轮"></a>79.6. 时间轮</h3>
 <div class="imageblock">
 <div class="content">
 <img src="./images/time-wheel.png" alt="time wheel">
@@ -18121,7 +18252,7 @@ key效率要更快些。对于HashMap的源码暂时就分析这么多，由于�
 </div>
 </div>
 <div class="sect2">
-<h3 id="_参考资料_26"><a class="anchor" href="#_参考资料_26"></a>78.7. 参考资料</h3>
+<h3 id="_参考资料_27"><a class="anchor" href="#_参考资料_27"></a>79.7. 参考资料</h3>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -18131,7 +18262,7 @@ key效率要更快些。对于HashMap的源码暂时就分析这么多，由于�
 </div>
 </div>
 <div class="sect2">
-<h3 id="_自定义_dubbo"><a class="anchor" href="#_自定义_dubbo"></a>78.8. 自定义 Dubbo</h3>
+<h3 id="_自定义_dubbo"><a class="anchor" href="#_自定义_dubbo"></a>79.8. 自定义 Dubbo</h3>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight nowrap"><code data-lang="java"><table class="linenotable"><tbody><tr><td class="linenos gl"><pre class="lineno">  1
@@ -29847,7 +29978,7 @@ key效率要更快些。对于HashMap的源码暂时就分析这么多，由于�
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-07-18 16:15:11 UTC
+Last updated 2022-02-20 13:10:55 UTC
 </div>
 </div>
 </body>
